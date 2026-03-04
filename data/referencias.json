@@ -1,0 +1,49 @@
+{
+  "referencias": [
+    {
+      "tipo": "livro",
+      "titulo": "Arquiteturas da Dúvida: Como Redesenhar o Sistema Penal Contra os Vieses da Mente Humana",
+      "autor": "Erigutemberg Meneses",
+      "ano": 2026,
+      "editora": "Editora"
+    },
+    {
+      "tipo": "livro",
+      "titulo": "Thinking, Fast and Slow",
+      "autor": "Daniel Kahneman",
+      "ano": 2011,
+      "editora": "Farrar, Straus and Giroux"
+    },
+    {
+      "tipo": "livro",
+      "titulo": "Convicting the Innocent: Where Criminal Prosecutions Go Wrong",
+      "autor": "Brandon L. Garrett",
+      "ano": 2022,
+      "editora": "Harvard University Press"
+    },
+    {
+      "tipo": "artigo",
+      "titulo": "Tunnel Vision and Confirmation Bias Among Police Investigators",
+      "autor": "Eitan Elaad",
+      "ano": 2022,
+      "periodico": "SAGE Open",
+      "volume": 12,
+      "numero": 2,
+      "paginas": "1-12",
+      "doi": "10.1177/21582440221095012"
+    },
+    {
+      "tipo": "relatorio",
+      "titulo": "Preventing Miscarriages of Justice: A Prosecutorial Guide",
+      "autor": "Public Prosecution Service of Canada",
+      "ano": 2019
+    },
+    {
+      "tipo": "jurisprudencia",
+      "titulo": "HC 598.886/SC",
+      "tribunal": "Superior Tribunal de Justiça",
+      "relator": "Ministro Rogerio Schietti Cruz",
+      "ano": 2020
+    }
+  ]
+}
