@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desmonte a Engrenagem Triádica | Simulador de Vieses</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #3b82f6;
+            --secondary: #0f172a;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #fbbf24;
+            --tunnel: #7c3aed;
+            --confirmation: #dc2626;
+            --hindsight: #ea580c;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+            --radius-sm: 0.375rem;
+            --radius: 0.5rem;
+            --radius-md: 0.75rem;
+            --radius-lg: 1rem;
+            --radius-xl: 1.5rem;
+            --radius-2xl: 2rem;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0b1120 0%, #1a2639 100%);
+            min-height: 100vh;
+            color: var(--gray-100);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--gray-400);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .subtitle strong {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* Tabela 2.2 */
+        .table-container {
+            background: rgba(255,255,255,0.02);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            margin-bottom: 2.5rem;
+            border: 1px solid var(--gray-800);
+            backdrop-filter: blur(10px);
+            overflow-x: auto;
+        }
+
+        .table-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--gray-200);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .table-title span {
+            background: var(--primary);
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: rgba(37, 99, 235, 0.2);
+            padding: 1rem;
+            text-align: left;
+            color: var(--gray-200);
+            font-weight: 600;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-800);
+            color: var(--gray-300);
+            vertical-align: top;
+        }
+
+        td:first-child {
+            font-weight: 600;
+            color: var(--gray-100);
+        }
+
+        .estagio-badge {
+            background: var(--gray-800);
+            padding: 0.25rem 0.75rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            color: var(--gray-300);
+        }
+
+        /* Grid principal */
+        .simulator-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .simulator-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Painel de casos */
+        .case-panel {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            border: 1px solid var(--gray-800);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .case-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .case-number {
+            background: var(--primary);
+            padding: 0.3rem 1rem;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .case-estagio {
+            background: var(--gray-800);
+            padding: 0.3rem 1rem;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            color: var(--gray-300);
+        }
+
+        .case-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+        }
+
+        .case-excerpt {
+            background: rgba(0,0,0,0.3);
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            margin-bottom: 2rem;
+            font-style: italic;
+            color: var(--gray-200);
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        .case-excerpt strong {
+            color: var(--accent);
+        }
+
+        /* Opções de vieses */
+        .bias-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .bias-option {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--gray-700);
+            border-radius: var(--radius);
+            padding: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .bias-option:hover {
+            background: rgba(37, 99, 235, 0.1);
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .bias-option.selected {
+            background: rgba(37, 99, 235, 0.15);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(37,99,235,0.3);
+        }
+
+        .bias-option-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .bias-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .bias-icon.tunnel {
+            background: rgba(124, 58, 237, 0.2);
+            color: #a78bfa;
+        }
+
+        .bias-icon.confirmation {
+            background: rgba(220, 38, 38, 0.2);
+            color: #f87171;
+        }
+
+        .bias-icon.hindsight {
+            background: rgba(234, 88, 12, 0.2);
+            color: #fb923c;
+        }
+
+        .bias-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .bias-name.tunnel { color: #a78bfa; }
+        .bias-name.confirmation { color: #f87171; }
+        .bias-name.hindsight { color: #fb923c; }
+
+        .bias-desc {
+            color: var(--gray-400);
+            font-size: 0.9rem;
+            margin-left: 3.5rem;
+        }
+
+        /* Painel de feedback */
+        .feedback-panel {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            border: 1px solid var(--gray-800);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .feedback-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feedback-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feedback-card.correct {
+            border-left: 4px solid var(--success);
+        }
+
+        .feedback-card.incorrect {
+            border-left: 4px solid var(--danger);
+        }
+
+        .feedback-indicator {
+            display: inline-block;
+            padding: 0.2rem 1rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .indicator-correct {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+        }
+
+        .indicator-incorrect {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+
+        .feedback-text {
+            color: var(--gray-200);
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .table-reference {
+            background: var(--gray-800);
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .table-reference h4 {
+            color: var(--gray-200);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .reference-item {
+            display: flex;
+            gap: 1rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed var(--gray-700);
+            font-size: 0.85rem;
+        }
+
+        .reference-estagio {
+            color: var(--primary);
+            font-weight: 600;
+            min-width: 80px;
+        }
+
+        .reference-desc {
+            color: var(--gray-300);
+        }
+
+        /* Botões */
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(37,99,235,0.3);
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--gray-800);
+            color: var(--gray-200);
+            border: 1px solid var(--gray-700);
+            padding: 0.8rem 1.5rem;
+            font-size: 0.9rem;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-700);
+            color: white;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--gray-800);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--gray-400);
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 3rem;
+            text-align: center;
+            color: var(--gray-500);
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        /* Animações */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .loading {
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚙️ Desmonte a Engrenagem Triádica</h1>
+            <div class="subtitle">
+                Identifique <strong>tunnel vision</strong>, <strong>confirmation bias</strong> e <strong>hindsight bias</strong> 
+                em trechos reais de inquéritos e sentenças
+            </div>
+        </div>
+
+        <!-- Tabela 2.2 -->
+        <div class="table-container">
+            <div class="table-title">
+                📊 Tabela 2.2 – Progressão do contágio probatório
+                <span>Base para análise</span>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Estágio</th>
+                        <th>Tunnel vision (institucional)</th>
+                        <th>Confirmation bias (cognitivo)</th>
+                        <th>Hindsight bias (retrospectivo)</th>
+                        <th>Indicador de risco crítico</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1. Hipótese inicial (0–24h)</td>
+                        <td>Fixação em suspeito com base em denúncia anônima não checada, perfil racial/estereotipado ou comportamento suspeito subjetivo</td>
+                        <td>Busca seletiva de elementos confirmatórios; negligência sistemática de fontes alternativas</td>
+                        <td>Não ativo ainda (desfecho não ocorreu)</td>
+                        <td>Tempo &lt;24h entre fato e fixação de suspeito sem descarte documentado de alternativas</td>
+                    </tr>
+                    <tr>
+                        <td>2. Consolidação (24h–7d)</td>
+                        <td>Descarte não documentado de hipóteses alternativas plausíveis; ausência de diligências para testar narrativas concorrentes</td>
+                        <td>Reinterpretação hierárquica de exculpatórias (ex.: álibi → fraude); habituação à ambiguidade</td>
+                        <td>Emergência incipiente: indícios frágeis reinterpretados como "consistentes"</td>
+                        <td>Ausência de registro de hipóteses alternativas testadas e razões para descarte</td>
+                    </tr>
+                    <tr>
+                        <td>3. Ratificação (7d–sentença)</td>
+                        <td>Efeito cascata: promotor reproduz narrativa policial; juiz conduz instrução com base em elementos já contaminados</td>
+                        <td>Subordinação hierárquica de exculpatórias na fundamentação judicial</td>
+                        <td>Retrovalidação plena: ambiguidades reinterpretadas como provas claras</td>
+                        <td>Sentença menciona exculpatórias apenas para descartá-las com justificativas especulativas</td>
+                    </tr>
+                    <tr>
+                        <td>4. Blindagem (pós-condenação)</td>
+                        <td>Resistência institucional à revisão mesmo diante de novas provas robustas</td>
+                        <td>Belief perseverance: persistência irracional na crença inicial</td>
+                        <td>Ilusão de inevitabilidade: condenação vista como "resultado natural"</td>
+                        <td>Recusa em analisar provas exculpatórias pós-condenação com alegação de coisa julgada</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--gray-500);">
+                Fonte: Elaboração do autor com base em PPSC (2019, Ch. 4); Garrett (2022); Elaad (2022).
+            </div>
+        </div>
+
+        <!-- Grid do simulador -->
+        <div class="simulator-grid">
+            <!-- Painel esquerdo: Caso -->
+            <div class="case-panel" id="casePanel">
+                <div class="case-header">
+                    <span class="case-number" id="caseNumber">Caso 1/10</span>
+                    <span class="case-estagio" id="caseEstagio">Estágio 1</span>
+                </div>
+                <h2 class="case-title" id="caseTitle">Carregando caso...</h2>
+                <div class="case-excerpt" id="caseExcerpt">
+                    <!-- Conteúdo via JS -->
+                </div>
+
+                <h3 style="color: white; margin-bottom: 1rem;">🔍 Qual viés está predominante neste trecho?</h3>
+                
+                <div class="bias-options" id="biasOptions">
+                    <div class="bias-option" data-bias="tunnel" id="optionTunnel">
+                        <div class="bias-option-header">
+                            <div class="bias-icon tunnel">🎯</div>
+                            <span class="bias-name tunnel">Tunnel Vision</span>
+                        </div>
+                        <div class="bias-desc">
+                            Fixação institucional em uma única linha investigativa, descarte de alternativas
+                        </div>
+                    </div>
+                    <div class="bias-option" data-bias="confirmation" id="optionConfirmation">
+                        <div class="bias-option-header">
+                            <div class="bias-icon confirmation">🔍</div>
+                            <span class="bias-name confirmation">Confirmation Bias</span>
+                        </div>
+                        <div class="bias-desc">
+                            Busca seletiva de provas confirmatórias, reinterpretação de evidências contrárias
+                        </div>
+                    </div>
+                    <div class="bias-option" data-bias="hindsight" id="optionHindsight">
+                        <div class="bias-option-header">
+                            <div class="bias-icon hindsight">👁️</div>
+                            <span class="bias-name hindsight">Hindsight Bias</span>
+                        </div>
+                        <div class="bias-desc">
+                            Reinterpretação retrospectiva de ambiguidades como "provas claras" após o desfecho
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-primary" id="checkBtn" disabled>✅ Verificar Análise</button>
+                <button class="btn-secondary" id="nextBtn">Próximo Caso →</button>
+            </div>
+
+            <!-- Painel direito: Feedback -->
+            <div class="feedback-panel" id="feedbackPanel">
+                <div class="feedback-title">
+                    <span>📋</span> Análise e Feedback
+                </div>
+                
+                <div id="feedbackContent">
+                    <div class="feedback-card" id="feedbackCard">
+                        <div class="feedback-indicator" id="feedbackIndicator">Aguardando análise</div>
+                        <div class="feedback-text" id="feedbackText">
+                            Selecione um viés e clique em "Verificar Análise" para receber feedback baseado na Tabela 2.2.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-reference" id="tableReference">
+                    <h4>📌 Referência na Tabela 2.2</h4>
+                    <div id="referenceContent">
+                        <div class="reference-item">
+                            <span class="reference-estagio">Estágio 1</span>
+                            <span class="reference-desc">Hipótese inicial: fixação em suspeito sem checagem</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-container">
+                    <div class="stat-item">
+                        <div class="stat-value" id="scoreAcertos">0</div>
+                        <div class="stat-label">Acertos</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="scoreTotal">0</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="scorePercentual">0%</div>
+                        <div class="stat-label">Aproveitamento</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Baseado na obra <strong>"Arquiteturas da Dúvida"</strong> de Erigutemberg Meneses • 
+            <a href="#" target="_blank">Sobre os vieses</a> • 
+            <a href="#" target="_blank">Referências completas</a></p>
+        </div>
+    </div>
+
+    <script>
+        // ========== BANCO DE CASOS ==========
+        const casos = [
+            {
+                id: 1,
+                titulo: "Reconhecimento Fotográfico por WhatsApp",
+                excerpt: `"A vítima foi contatada via WhatsApp pelo investigador, que enviou apenas uma foto do suspeito, questionando: 'É este mesmo?'. A vítima respondeu: 'Acho que é ele sim, parecido'. O investigador registrou como 'reconhecimento positivo'. Não foram realizadas outras diligências para buscar outros suspeitos com características similares."`,
+                estagio: 1,
+                viesCorreto: "tunnel",
+                explicacao: "Fixação em suspeito único com base em reconhecimento sugestivo, sem descarte de alternativas (indicador crítico: <24h sem checagem).",
+                referenciaEstagio: "Estágio 1: Hipótese inicial",
+                referenciaDesc: "Tunnel vision: fixação em suspeito com base em denúncia anônima não checada / comportamento subjetivo"
+            },
+            {
+                id: 2,
+                titulo: "Álibi Desconsiderado",
+                excerpt: `"O suspeito apresentou comprovante de ponto eletrônico e testemunha (chefe) confirmando que estava trabalhando no horário do crime. O delegado registrou: 'Álibi frágil, pois o chefe é amigo do suspeito. Mantemos a linha investigativa.' Não houve tentativa de corroborar ou refutar o álibi com outros meios."`,
+                estagio: 2,
+                viesCorreto: "confirmation",
+                explicacao: "Reinterpretação hierárquica de exculpatórias (álibi → fraude). Busca seletiva de elementos confirmatórios.",
+                referenciaEstagio: "Estágio 2: Consolidação",
+                referenciaDesc: "Confirmation bias: reinterpretação de exculpatórias (ex.: álibi → fraude); habituação à ambiguidade"
+            },
+            {
+                id: 3,
+                titulo: "Sentença com Reinterpretação",
+                excerpt: `"Embora o laudo pericial não tenha encontrado DNA do acusado, isso não exclui sua participação, pois pode ter utilizado luvas ou havido contaminação. As testemunhas, apesar de contraditórias, foram coerentes nos pontos principais. O conjunto probatório, ainda que indireto, é robusto para a condenação."`,
+                estagio: 3,
+                viesCorreto: "hindsight",
+                explicacao: "Retrovalidação plena: ambiguidades reinterpretadas como provas claras. Subordinação hierárquica de exculpatórias.",
+                referenciaEstagio: "Estágio 3: Ratificação",
+                referenciaDesc: "Hindsight bias: ambiguidades reinterpretadas como provas claras após o desfecho"
+            },
+            {
+                id: 4,
+                titulo: "Prisão Preventiva Decretada",
+                excerpt: `"O Ministério Público, reproduzindo integralmente o relatório policial, requereu a prisão preventiva com base no 'forte indício de autoria' derivado do reconhecimento fotográfico. O juiz deferiu, destacando a 'consistência das provas' sem qualquer análise crítica do reconhecimento."`,
+                estagio: 3,
+                viesCorreto: "tunnel",
+                explicacao: "Efeito cascata: promotor reproduz narrativa policial; juiz valida sem questionamento. Tunnel vision institucional.",
+                referenciaEstagio: "Estágio 3: Ratificação",
+                referenciaDesc: "Tunnel vision: efeito cascata – promotor reproduz narrativa policial; juiz conduz instrução com base em elementos já contaminados"
+            },
+            {
+                id: 5,
+                titulo: "Negativa de Revisão",
+                excerpt: `"A defesa apresentou novas provas (imagens de câmera) demonstrando que o acusado estava em outro local. O tribunal negou o pedido de revisão criminal, sob o argumento de que 'a coisa julgada não pode ser relativizada por provas que deveriam ter sido produzidas na instrução'."`,
+                estagio: 4,
+                viesCorreto: "hindsight",
+                explicacao: "Resistência institucional à revisão mesmo diante de novas provas robustas. Ilusão de inevitabilidade.",
+                referenciaEstagio: "Estágio 4: Blindagem",
+                referenciaDesc: "Blindagem: recusa em analisar provas exculpatórias pós-condenação com alegação de coisa julgada"
+            },
+            {
+                id: 6,
+                titulo: "Denúncia Anônima Não Verificada",
+                excerpt: `"Uma denúncia anônima apontou 'um homem moreno, de boné vermelho' como autor do roubo. Em menos de 6 horas, a polícia localizou M.S., único moreno de boné vermelho nas proximidades, e o apresentou à vítima, que o reconheceu. Não houve tentativa de verificar a credibilidade da denúncia ou buscar outras pessoas com características similares."`,
+                estagio: 1,
+                viesCorreto: "tunnel",
+                explicacao: "Fixação em suspeito com base em denúncia anônima não checada. Tempo <24h sem descarte de alternativas.",
+                referenciaEstagio: "Estágio 1: Hipótese inicial",
+                referenciaDesc: "Tunnel vision: fixação em suspeito com base em denúncia anônima não checada"
+            },
+            {
+                id: 7,
+                titulo: "Laudo Negativo Descartado",
+                excerpt: `"O exame de DNA não identificou o suspeito, mas o perito consignou que 'a ausência de perfil não exclui a participação, pois a amostra pode estar degradada'. O promotor, na denúncia, afirmou que 'o laudo é inconclusivo, não afastando a autoria'. O juiz, na sentença, mencionou que 'a prova pericial não elidiu os demais indícios'."`,
+                estagio: 3,
+                viesCorreto: "confirmation",
+                explicacao: "Reinterpretação hierárquica de exculpatórias (DNA negativo → 'inconclusivo'). Subordinação na fundamentação.",
+                referenciaEstagio: "Estágio 3: Ratificação",
+                referenciaDesc: "Confirmation bias: subordinação hierárquica de exculpatórias na fundamentação judicial"
+            },
+            {
+                id: 8,
+                titulo: "Comportamento Nervoso",
+                excerpt: `"O abordado demonstrou nervosismo e suor excessivo durante a abordagem, o que, segundo os policiais, é 'típico de criminoso'. Com base nisso, foi realizado busca pessoal, encontrando pequena quantidade de droga. O delegado, no relatório, destacou o 'comportamento suspeito' como indício de envolvimento com o tráfico."`,
+                estagio: 1,
+                viesCorreto: "tunnel",
+                explicacao: "Fixaçã
